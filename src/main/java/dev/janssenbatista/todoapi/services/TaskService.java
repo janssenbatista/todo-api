@@ -4,6 +4,8 @@ import dev.janssenbatista.todoapi.controllers.dtos.CreateTaskDto;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
 import dev.janssenbatista.todoapi.exceptions.BadRequestException;
 import dev.janssenbatista.todoapi.repositories.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +24,10 @@ public class TaskService {
         }
         var task = new TaskEntity(null, taskDto.title(), taskDto.description(), false);
         return taskRepository.save(task);
+    }
+
+    public Page<TaskEntity> listAll(Pageable pageable) {
+        return taskRepository.findAll(pageable);
     }
 
 

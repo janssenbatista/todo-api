@@ -1,5 +1,6 @@
-package dev.janssenbatista.todoapi.controllers.dtos;
+package dev.janssenbatista.todoapi.controllers;
 
+import dev.janssenbatista.todoapi.controllers.dtos.CreateTaskDto;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
 import dev.janssenbatista.todoapi.services.TaskService;
 import org.springframework.http.HttpStatus;

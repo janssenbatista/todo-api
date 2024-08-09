@@ -41,5 +41,10 @@ public class TaskService {
         return taskRepository.save(foundTask);
     }
 
+    public void delete(Long id) {
+        var foundTask = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Tarefa não encontrada"));
+        taskRepository.delete(foundTask);
+    }
+
 
 }

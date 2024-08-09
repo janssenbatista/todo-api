@@ -1,6 +1,5 @@
 package dev.janssenbatista.todoapi.services;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
 import dev.janssenbatista.todoapi.controllers.dtos.CreateTaskDto;
 import dev.janssenbatista.todoapi.controllers.dtos.UpdateTaskDto;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
@@ -8,7 +7,6 @@ import dev.janssenbatista.todoapi.exceptions.BadRequestException;
 import dev.janssenbatista.todoapi.exceptions.NotFoundException;
 import dev.janssenbatista.todoapi.repositories.TaskRepository;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

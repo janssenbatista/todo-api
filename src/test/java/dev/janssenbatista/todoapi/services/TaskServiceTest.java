@@ -10,6 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -47,5 +51,19 @@ class TaskServiceTest {
             taskService.save(taskDto);
         }).isInstanceOf(BadRequestException.class).hasMessageContaining("Essa tarefa já existe");
         verify(taskRepository, never()).save(any(TaskEntity.class));
+    }
+
+    @Test
+    public void shouldListAllTasks() {
+        var task = new TaskEntity(1L, "task title", "task description", false);
+        var taskPage = new PageImpl<>(List.of(task));
+        var pageable = PageRequest.of(0, 1);
+        when(taskRepository.findAll(pageable)).thenReturn(taskPage);
+        var page = taskService.listAll(pageable);
+        assertThat(page).isNotNull();
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getSize()).isEqualTo(1);
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0)).isEqualTo(task);
     }
 }

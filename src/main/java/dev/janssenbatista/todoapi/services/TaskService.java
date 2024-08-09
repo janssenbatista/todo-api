@@ -36,7 +36,7 @@ public class TaskService {
     }
 
     public TaskEntity update(Long id, UpdateTaskDto taskDto) {
-        var foundTask = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Task not found"));
+        var foundTask = taskRepository.findById(id).orElseThrow(() -> new NotFoundException("Tarefa não encontrada"));
         BeanUtils.copyProperties(taskDto, foundTask);
         return taskRepository.save(foundTask);
     }

@@ -1,8 +1,10 @@
 package dev.janssenbatista.todoapi.services;
 
 import dev.janssenbatista.todoapi.controllers.dtos.CreateTaskDto;
+import dev.janssenbatista.todoapi.controllers.dtos.UpdateTaskDto;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
 import dev.janssenbatista.todoapi.exceptions.BadRequestException;
+import dev.janssenbatista.todoapi.exceptions.NotFoundException;
 import dev.janssenbatista.todoapi.repositories.TaskRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -65,5 +68,30 @@ class TaskServiceTest {
         assertThat(page.getSize()).isEqualTo(1);
         assertThat(page.getTotalElements()).isEqualTo(1);
         assertThat(page.getContent().get(0)).isEqualTo(task);
+    }
+
+    @Test()
+    public void shouldUpdateATask() {
+        var foundTask = new TaskEntity(1L, "task title", "task description", false);
+        var taskId = 1L;
+        var updateTaskDto = new UpdateTaskDto("new task title", "new task description");
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(foundTask));
+        when(taskRepository.save(Mockito.any(TaskEntity.class))).thenReturn(foundTask);
+        var updatedTask = taskService.update(taskId, updateTaskDto);
+        assertThat(updatedTask).isNotNull();
+        assertThat(updatedTask.getId()).isEqualTo(foundTask.getId());
+        assertThat(updatedTask.getTitle()).isEqualTo(foundTask.getTitle());
+        assertThat(updatedTask.getDescription()).isEqualTo(foundTask.getDescription());
+    }
+
+    @Test()
+    public void shouldThrowBadRequestExceptionWhenUpdateATask() {
+        var taskId = 1L;
+        var updateTaskDto = new UpdateTaskDto("new task title", "new task description");
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> {
+            taskService.update(taskId, updateTaskDto);
+        }).isInstanceOf(NotFoundException.class).hasMessageContaining("Tarefa não encontrada");
+        verify(taskRepository, never()).save(Mockito.any(TaskEntity.class));
     }
 }

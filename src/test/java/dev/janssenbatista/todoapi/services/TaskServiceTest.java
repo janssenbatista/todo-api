@@ -94,4 +94,23 @@ class TaskServiceTest {
         }).isInstanceOf(NotFoundException.class).hasMessageContaining("Tarefa não encontrada");
         verify(taskRepository, never()).save(Mockito.any(TaskEntity.class));
     }
+
+    @Test()
+    public void shouldDeleteATask() {
+        var foundTask = new TaskEntity(1L, "task title", "task description", false);
+        var taskId = 1L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(foundTask));
+        taskService.delete(taskId);
+        verify(taskRepository, times(1)).delete(Mockito.any(TaskEntity.class));
+    }
+
+    @Test()
+    public void shouldThrowNotFoundExceptionWhenDeleteATask() {
+        var taskId = 1L;
+        when(taskRepository.findById(taskId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> {
+            taskService.delete(taskId);
+        }).isInstanceOf(NotFoundException.class).hasMessageContaining("Tarefa não encontrada");
+        verify(taskRepository, never()).delete(Mockito.any(TaskEntity.class));
+    }
 }

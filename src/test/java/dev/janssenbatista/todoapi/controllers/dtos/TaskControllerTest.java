@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.janssenbatista.todoapi.controllers.TaskController;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
 import dev.janssenbatista.todoapi.exceptions.BadRequestException;
+import dev.janssenbatista.todoapi.exceptions.NotFoundException;
 import dev.janssenbatista.todoapi.services.TaskService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TaskController.class)
@@ -37,8 +38,8 @@ class TaskControllerTest {
         var createdTask = new TaskEntity(1L, dto.title(), dto.description(), false);
         when(taskService.save(dto)).thenReturn(createdTask);
         mockMvc.perform(post("/api/tarefas")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(dto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated());
     }
 
@@ -58,6 +59,33 @@ class TaskControllerTest {
     public void shouldListAllTasks() throws Exception {
         mockMvc.perform(get("/api/tarefas"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldUpdateATaskAndReturn200() throws Exception {
+        var dto = new UpdateTaskDto("new task title", "new task description");
+        var task = new TaskEntity(1L, "task title", "task description", false);
+        when(taskService.update(task.getId(), dto)).thenReturn(task);
+        var response = mockMvc.perform(put("/api/tarefas/" + task.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andReturn();
+        var taskEntity = mapper.readValue(response.getResponse().getContentAsString(), TaskEntity.class);
+        assertThat(taskEntity).isNotNull();
+    }
+
+    @Test
+    public void shouldNotUpdateATaskAndReturn404() throws Exception {
+        var taskId = 1L;
+        var dto = new UpdateTaskDto("new task title", "new task description");
+        when(taskService.update(taskId, dto)).thenThrow(new NotFoundException("Tarefa não encontrada"));
+        var response = mockMvc.perform(put("/api/tarefas/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+        assertThat(response.getResponse().getContentAsString()).isEqualTo("Tarefa não encontrada");
     }
 
 }

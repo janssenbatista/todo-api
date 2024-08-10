@@ -1,6 +1,7 @@
 package dev.janssenbatista.todoapi.controllers;
 
 import dev.janssenbatista.todoapi.controllers.dtos.CreateTaskDto;
+import dev.janssenbatista.todoapi.controllers.dtos.UpdateTaskDto;
 import dev.janssenbatista.todoapi.entities.TaskEntity;
 import dev.janssenbatista.todoapi.services.TaskService;
 import org.springframework.data.domain.Page;
@@ -30,5 +31,10 @@ public class TaskController {
                                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         return ResponseEntity.ok(taskService.listAll(pageable));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<TaskEntity> updateTask(@PathVariable Long id, @RequestBody UpdateTaskDto taskDto) {
+        return ResponseEntity.ok(taskService.update(id, taskDto));
     }
 }

@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:todo_api_db
     driver-class-name: org.h2.Driver
-    username: janssen
+    username: user
     password:
     h2:
       console:

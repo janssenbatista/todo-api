@@ -12,12 +12,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TaskController.class)
@@ -83,6 +82,24 @@ class TaskControllerTest {
         var response = mockMvc.perform(put("/api/tarefas/" + taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+        assertThat(response.getResponse().getContentAsString()).isEqualTo("Tarefa não encontrada");
+    }
+
+    @Test
+    public void shouldDeleteATaskAndReturn204() throws Exception {
+        var taskId = 1L;
+        mockMvc.perform(delete("/api/tarefas/" + taskId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void shouldNotDeleteATaskAndReturn404() throws Exception {
+        var taskId = 1L;
+        doThrow(new NotFoundException("Tarefa não encontrada"))
+                .when(taskService).delete(taskId);
+        var response = mockMvc.perform(delete("/api/tarefas/" + taskId))
                 .andExpect(status().isNotFound())
                 .andReturn();
         assertThat(response.getResponse().getContentAsString()).isEqualTo("Tarefa não encontrada");
